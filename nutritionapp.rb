@@ -17,38 +17,30 @@ get '/' do
 end
 
 get '/venues' do
-    dbResults = client.query("SELECT * FROM Venues;")
-    prereturn = { :count => dbResults.count, :venues => [] }
-    dbResults.each do |row|
-        prereturn[:venues].push({:id => row["ID"], :name => row["Name"]})
+    db_result = client.query("SELECT * FROM Venues;")
+    hash_result = { :count => db_result.count, :venues => [] }
+    db_result.each do |row|
+        hash_result[:venues].push({:id => row["ID"], :name => row["Name"]})
     end
-    prereturn.to_json
+    hash_result.to_json
 end
 
 get '/venues/:vid/meals' do
     clean_vid = client.escape(params[:vid]);
-    dbResults = client.query("SELECT * FROM Meals WHERE VenueID='#{clean_vid}'");
-    prereturn = { :count => dbResults.count, :meals => [] }
-    dbResults.each do |row|
-        prereturn[:meals].push({:id => row["ID"], :name => row["Name"], :servingsizeoz => row["ServingSizeOz"], :nutritionvalues => JSON.parse(row["NutritionValues"])})
+    db_result = client.query("SELECT * FROM Meals WHERE VenueID='#{clean_vid}'");
+    hash_result = { :count => db_result.count, :meals => [] }
+    db_result.each do |row|
+        hash_result[:meals].push({:id => row["ID"], :name => row["Name"], :servingsizeoz => row["ServingSizeOz"], :nutritionvalues => JSON.parse(row["NutritionValues"])})
     end
-    prereturn.to_json
+    hash_result.to_json
 end
 
 get '/meals/:mid' do
     clean_mid = client.escape(params[:mid]);
-    dbResults = client.query("SELECT * FROM Meals WHERE ID='#{clean_mid}'");
-    prereturn = { :count => dbResults.count, :meals => [] }
-    dbResults.each do |row|
-        prereturn[:meals].push({:id => row["ID"], :name => row["Name"], :servingsizeoz => row["ServingSizeOz"], :nutritionvalues => JSON.parse(row["NutritionValues"])})
+    db_result = client.query("SELECT * FROM Meals WHERE ID='#{clean_mid}'");
+    hash_result = { :count => db_result.count, :meals => [] }
+    db_result.each do |row|
+        hash_result[:meals].push({:id => row["ID"], :name => row["Name"], :servingsizeoz => row["ServingSizeOz"], :nutritionvalues => JSON.parse(row["NutritionValues"])})
     end
-    prereturn.to_json
+    hash_result.to_json
 end
-
-#begin
-#rescue mysql2::Error => e
-#	puts '#{e.errno}(#{e.sqlstate}): #{e.error}'
-#	exit 1
-#ensure
-#	client.close if client
-#end
