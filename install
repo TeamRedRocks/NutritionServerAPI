@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ ! -f dbcfg.rb ]; then
+	echo "No dbcfg.rb file found! Please rename the dbcfg.rb.template and configure it"
+	exit 1
+fi
+
+if [ ! -d /opt/napi ]; then
+	mkdir /opt/napi
+fi
+
+if [ -f /opt/napi/nutritionapp.pid ]; then
+	echo "Stop the running application before installing!"
+	exit 1
+fi
+
+cp -i dbcfg.rb /opt/napi
+cp -i nutritionapp.rb /opt/napi
+cp -i control.rb /opt/napi
