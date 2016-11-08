@@ -3,14 +3,13 @@ require 'sinatra'
 require 'json'
 require 'mysql2'
 
-require './dbcfg.rb'
+require File.join(File.dirname(__FILE__), 'dbcfg.rb')
 
 set :bind, '0.0.0.0'
 set :port, '4568'
 set :json_content_type, :js
 
 client = Mysql2::Client.new(:username => $username, :password => $password, :database => $schema, :reconnect => true)
-
 
 get '/' do
     'You have reached the Team Red API'
@@ -26,8 +25,8 @@ get '/venues' do
 end
 
 get '/venues/:vid/meals' do
-    clean_vid = client.escape(params[:vid]);
-    dbResults = client.query("SELECT * FROM Meals WHERE VenueID='#{clean_vid}'");
+    clean_vid = client.escape(params[:vid])
+    dbResults = client.query("SELECT * FROM Meals WHERE VenueID='#{clean_vid}'")
     prereturn = { :count => dbResults.count, :meals => [] }
     dbResults.each do |row|
         prereturn[:meals].push({:id => row["ID"], :name => row["Name"], :servingsizeoz => row["ServingSizeOz"], :nutritionvalues => JSON.parse(row["NutritionValues"])})
@@ -43,6 +42,12 @@ get '/meals/:mid' do
         prereturn[:meals].push({:id => row["ID"], :name => row["Name"], :servingsizeoz => row["ServingSizeOz"], :nutritionvalues => JSON.parse(row["NutritionValues"])})
     end
     prereturn.to_json
+end
+
+post '/venues' do
+    @name = client.escape(params[:name])
+    dbResult = client.query("INSERT INTO Venues (Name) VALUES ('#{@name}')")
+    { :response => dbResult }.to_json
 end
 
 #begin
