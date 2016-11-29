@@ -46,7 +46,7 @@ end
 
 get '/recommendations/:nutrient' do
     @clean_nutrient = client.escape(params[:nutrient])
-    db_result = client.query("SELECT * FROM Recommendations WHERE LCASE(Nutrient)=LCASE('#{@clean_nutrient}')")
+    db_result = client.query("SELECT * FROM NutrientRecommendations WHERE LCASE(Nutrient)=LCASE('#{@clean_nutrient}')")
     hash_result = { :count => db_result.count, :recommendations => [] }
     db_result.each do |row|
         hash_result[:recommendations].push({:key => row["Key"], :nutrient => row["Nutrient"], :recommendation => row["Recommendation"], :datasource => row["DataSource"]})
@@ -87,7 +87,7 @@ post '/venues/:vid/meals' do
         status 400
         body ({ :error => "The 'nutritionvaluesjson' parameter must be specified"})
         return
-    elseif not (params[:servingsizeoz] =~ /^\d+(\.\d+)?$/)
+    elseif not(/^\d+(\.\d+)?$/ =~ params[:servingsizeoz])
         status 400
         body ({ :error => "The 'servingsizeoz' parameter must be a number"})
         return
@@ -124,7 +124,7 @@ post '/recommendation' do
         return
 	elseif params[:nutrient] == nil
         status 400
-        body ({ :error => "The 'nutrient' parameter must be specified. This should be the nutrient the recommendation refefences."})
+        body ({ :error => "The 'nutrient' parameter must be specified. This should be the nutrient the recommendation references."})
         return
 	elseif params[:recommendation] == nil
         status 400
@@ -138,14 +138,15 @@ post '/recommendation' do
     @datasource = ""
 	if params[:datasource] != nil
 		@datasource = client.escape(params[:datasource])
+    end
     
-    dbResult = client.query("SELECT * FROM NutrientRecommendations WHERE key = '#{@key}'")
+    dbResult = client.query("SELECT * FROM NutrientRecommendations WHERE NutrientRecommendations.Key = '#{@key}'")
     if (dbResult.count > 0)
         status 409
         body ({ :error => "This recommendation key exists and duplicates are not supported" }.to_json)
         return
     end
 	
-	dbResult = client.query("INSERT INTO NutrientRecommendations (Key, Nutrient, Recommendation, DataSource) VALUES ('#{@key}', '#{@nutrient}', '#{@recommendation}', '#{@datasource}')")
+	dbResult = client.query("INSERT INTO NutrientRecommendations (NutrientRecommendations.Key, Nutrient, Recommendation, DataSource) VALUES ('#{@key}', '#{@nutrient}', '#{@recommendation}', '#{@datasource}')")
     body ({ :message => "Recommendation '#{@key}' was added successfully" }.to_json)
 end
