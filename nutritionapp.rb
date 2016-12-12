@@ -44,6 +44,15 @@ get '/meals/:mid' do
     hash_result.to_json
 end
 
+get '/recommendations' do
+    db_result = client.query("SELECT * FROM NutrientRecommendations")
+    hash_result = { :count => db_result.count, :recommendations => [] }
+    db_result.each do |row|
+        hash_result[:recommendations].push({:key => row["Key"], :nutrient => row["Nutrient"], :recommendation => row["Recommendation"], :datasource => row["DataSource"]})
+    end
+    hash_result.to_json
+end
+
 get '/recommendations/:nutrient' do
     @clean_nutrient = client.escape(params[:nutrient])
     db_result = client.query("SELECT * FROM NutrientRecommendations WHERE LCASE(Nutrient)=LCASE('#{@clean_nutrient}')")
@@ -120,15 +129,15 @@ end
 post '/recommendation' do
 	if params[:key] == nil
         status 400
-        body ({ :error => "The 'key' parameter must be specified. This should be a unique identifier less than 65 characters long."})
+        body ({ :error => "The 'key' parameter must be specified. This will be a unique identifier less than 65 characters long."})
         return
 	elseif params[:nutrient] == nil
         status 400
-        body ({ :error => "The 'nutrient' parameter must be specified. This should be the nutrient the recommendation references."})
+        body ({ :error => "The 'nutrient' parameter must be specified. This will be the nutrient the recommendation references."})
         return
 	elseif params[:recommendation] == nil
         status 400
-        body ({ :error => "The 'recommendation' parameter must be specified. It should contain a message about what users are to do if they are low on a nutrient."})
+        body ({ :error => "The 'recommendation' parameter must be specified. It will contain a message about what users are to do if they are low on a nutrient."})
         return
 	end
 	
@@ -150,3 +159,7 @@ post '/recommendation' do
 	dbResult = client.query("INSERT INTO NutrientRecommendations (NutrientRecommendations.Key, Nutrient, Recommendation, DataSource) VALUES ('#{@key}', '#{@nutrient}', '#{@recommendation}', '#{@datasource}')")
     body ({ :message => "Recommendation '#{@key}' was added successfully" }.to_json)
 end
+
+# todo support update (PUT)
+
+# todo support delete (DELETE)
